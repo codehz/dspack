@@ -84,6 +84,7 @@ async function main(options: {
 }, entrys: string[]) {
   try {
     const buildOptions: esbuild.BuildOptions = {
+      bundle: true,
       plugins: [denoPlugin({ importMapFile: options.importMap })],
       entryPoints: entrys,
       sourcemap: options.sourcemap,
