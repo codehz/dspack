@@ -68,6 +68,9 @@ await new Command()
     depends: ["serve"],
   })
   .option("-i, --index <index:string>", "index path", { depends: ["serve"] })
+  .option("--spa", "single page application mode", {
+    depends: ["serve", "index"],
+  })
   .arguments("<entry...:string>")
   .action(main)
   .parse(Deno.args);
@@ -88,6 +91,7 @@ async function main(options: {
   target?: string[];
   define?: Record<string, string>;
   watch?: true;
+  spa?: true;
 }, entrys: string[]) {
   try {
     const buildOptions: esbuild.BuildOptions = {
@@ -132,7 +136,12 @@ async function main(options: {
         const listeners = await Promise.all(options.serve.map(listen));
         const lis = Promise.all(listeners.map(async (listener) => {
           for await (const conn of listener) {
-            pipeTo(conn, options.index, res.host, res.port);
+            pipeTo(
+              conn,
+              { index: options.index, spa: options.spa ?? false },
+              res.host,
+              res.port,
+            );
           }
         }));
         await Promise.race([res.wait, lis]);
@@ -149,7 +158,7 @@ async function main(options: {
 
 async function pipeTo(
   conn: Deno.Conn,
-  index: string | undefined,
+  { index, spa }: { index?: string; spa: boolean },
   host: string,
   port: number,
 ) {
@@ -160,7 +169,13 @@ async function pipeTo(
     url.protocol = "http:";
     url.host = host;
     url.port = port + "";
-    if (index && url.pathname.endsWith("/")) url.pathname += index;
+    if (index) {
+      if (spa && !/\.[^/]+$/.test(url.pathname)) {
+        url.pathname = `/${index}`;
+      } else {
+        if (url.pathname.endsWith("/")) url.pathname += index;
+      }
+    }
     await req.respondWith(fetch(url));
   }
 }
