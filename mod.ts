@@ -14,6 +14,7 @@ await new Command()
   .version("0.0.0")
   .description("Dead simple deno to browser packager")
   .option("--import-map <importMap:string>", "import map file")
+  .option("--tsconfig <tsconfig:string>", "tsconfig file")
   .option("-o, --out <out:string>", "output dir", {
     default: "./dist/",
   })
@@ -66,6 +67,7 @@ await new Command()
 
 async function main(options: {
   importMap?: string;
+  tsconfig?: string;
   sourcemap?: TypeValue<typeof SourceMapOptions>;
   sourceRoot?: string;
   minify: boolean;
@@ -91,6 +93,7 @@ async function main(options: {
       format: options.esm ? "esm" : "iife",
       outdir: options.out,
       minify: options.minify,
+      tsconfig: options.tsconfig,
       treeShaking: options.treeShaking,
     };
     if (options.serve) {
