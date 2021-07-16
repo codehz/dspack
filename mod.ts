@@ -4,6 +4,13 @@ import {
   TypeValue,
   ValidationError,
 } from "https://deno.land/x/cliffy@v0.19.2/command/mod.ts";
+import {
+  bold,
+  green,
+  italic,
+  red,
+  underline,
+} from "https://deno.land/std@0.101.0/fmt/colors.ts";
 import { denoPlugin, esbuild } from "./deps.ts";
 
 const SourceMapOptions = new EnumType(["inline", "external", "both"]);
@@ -101,6 +108,16 @@ async function main(options: {
       const res = await esbuild.serve({
         host: "127.254.254.254",
         servedir: options.serveDir ?? options.out,
+        onRequest(req) {
+          const status = req.status < 400 ? green : red;
+          console.log(
+            status(req.status + ""),
+            bold(`[${req.method}]`),
+            underline(req.path),
+            italic(req.timeInMS + "ms"),
+            underline(req.remoteAddress),
+          );
+        },
       }, buildOptions);
       try {
         const listen = options.tls
