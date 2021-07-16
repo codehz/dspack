@@ -98,7 +98,7 @@ async function main(options: {
     };
     if (options.serve) {
       const res = await esbuild.serve({
-        host: "127.0.0.1",
+        host: "127.254.254.254",
         servedir: options.serveDir ?? options.out,
       }, buildOptions);
       try {
