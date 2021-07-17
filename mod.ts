@@ -144,6 +144,16 @@ async function main(options: {
             );
           }
         }));
+        console.log(
+          "http server started:",
+          options.serve
+            .map(({ hostname, port }) =>
+              underline(
+                `${options.tls ? "https" : "http"}://${hostname}:${port}/`,
+              )
+            )
+            .join(", "),
+        );
         await Promise.race([res.wait, lis]);
       } finally {
         res.stop();
