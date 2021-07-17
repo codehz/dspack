@@ -25,7 +25,7 @@ await new Command()
   .option("-o, --out <out:string>", "output dir", {
     default: "./dist/",
   })
-  .option("-t, --target <out:string>", "output dir", {
+  .option("-t, --target <out:string>", "compile target", {
     collect: true,
   })
   .option("-D, --define <key_value:string>", "define global identifier", {
@@ -44,7 +44,7 @@ await new Command()
     depends: ["sourcemap"],
   })
   .option("--no-minify", "don't minify")
-  .option("--no-esm", "don't generate es6 module")
+  .option("--no-module", "don't generate es6 module")
   .option("--tree-shaking", "do tree shaking")
   .option("--watch", "watch mode")
   .option("--serve <host>", "run built-in http server", {
@@ -58,7 +58,7 @@ await new Command()
       return [...previous, { hostname, port }];
     },
   })
-  .option("--server-dir <folder:string>", "root directory of built-in server", {
+  .option("--serve-dir <folder:string>", "root directory of built-in server", {
     depends: ["serve"],
   })
   .option("--tls.cert, --cert <cert:string>", "TLS certificate", {
@@ -87,7 +87,7 @@ async function main(options: {
   index?: string;
   tls?: { cert?: string; key?: string };
   out: string;
-  esm: boolean;
+  module: boolean;
   target?: string[];
   define?: Record<string, string>;
   watch?: true;
@@ -102,7 +102,7 @@ async function main(options: {
       sourceRoot: options.sourceRoot,
       watch: options.watch,
       define: options.define,
-      format: options.esm ? "esm" : "iife",
+      format: options.module ? "esm" : "iife",
       outdir: options.out,
       minify: options.minify,
       tsconfig: options.tsconfig,
