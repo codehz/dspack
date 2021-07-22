@@ -15,6 +15,15 @@ import { denoPlugin, esbuild } from "./deps.ts";
 
 const SourceMapOptions = new EnumType(["inline", "external", "both"]);
 
+function kvParser(input: string, previous = {}) {
+  const [key, value] = input.split("=");
+  if (value == null) {
+    return { ...previous, [input]: true };
+  } else {
+    return { ...previous, [key]: value };
+  }
+}
+
 await new Command()
   .type("sourcemap", SourceMapOptions)
   .name("dspack")
@@ -30,14 +39,11 @@ await new Command()
   })
   .option("-D, --define <key_value:string>", "define global identifier", {
     collect: true,
-    value(input: string, previous = {}) {
-      const [key, value] = input.split("=");
-      if (value == null) {
-        return { ...previous, [input]: true };
-      } else {
-        return { ...previous, [key]: value };
-      }
-    },
+    value: kvParser,
+  })
+  .option("-L, --loader <mapping:string>", "define file loader", {
+    collect: true,
+    value: kvParser,
   })
   .option("--sourcemap <option:sourcemap>", "generate sourcemap style")
   .option("--source-root <path:string>", "source root for sourcemap", {
@@ -90,6 +96,7 @@ async function main(options: {
   module: boolean;
   target?: string[];
   define?: Record<string, string>;
+  loader?: Record<string, esbuild.Loader>;
   watch?: true;
   spa?: true;
 }, entrys: string[]) {
@@ -102,6 +109,7 @@ async function main(options: {
       sourceRoot: options.sourceRoot,
       watch: options.watch,
       define: options.define,
+      loader: options.loader,
       format: options.module ? "esm" : "iife",
       outdir: options.out,
       minify: options.minify,
